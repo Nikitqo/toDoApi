@@ -1,17 +1,11 @@
+from pydantic import BaseModel, EmailStr, constr
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr, constr
+from enum import Enum
 
 
-class CreateUser(BaseModel):
-    username: str
-    email: EmailStr
-    password: constr(min_length=8, max_length=16)
-
-
-class UserLogIn(BaseModel):
-    email: EmailStr
-    password: constr(min_length=8, max_length=16)
+class State(str, Enum):
+    STATE = 'STATE'
 
 
 class CreateTask(BaseModel):
@@ -20,8 +14,15 @@ class CreateTask(BaseModel):
     deadline: datetime
 
 
-class UpdateTask(BaseModel):
+class GetTask(BaseModel):
     name: Optional[constr(min_length=3, max_length=255)]
     description: Optional[constr(min_length=0, max_length=255)]
     deadline: Optional[datetime]
     state: Optional[str]
+
+
+class UpdateTask(BaseModel):
+    name: Optional[constr(min_length=3, max_length=255)]
+    description: Optional[constr(min_length=0, max_length=255)]
+    deadline: Optional[datetime]
+    state: Optional[State]
