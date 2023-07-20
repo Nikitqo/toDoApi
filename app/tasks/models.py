@@ -14,11 +14,13 @@ class CreateTask(BaseModel):
     deadline: datetime
 
 
-class GetTask(BaseModel):
-    name: Optional[constr(min_length=3, max_length=255)]
-    description: Optional[constr(min_length=0, max_length=255)]
-    deadline: Optional[datetime]
-    state: Optional[str]
+class Task(BaseModel):
+    id: str
+    name: constr(min_length=3, max_length=255)
+    description: constr(min_length=0, max_length=255)
+    deadline: datetime
+    state: str
+    created_at: datetime
 
 
 class UpdateTask(BaseModel):
