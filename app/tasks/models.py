@@ -5,7 +5,8 @@ from enum import Enum
 
 
 class State(str, Enum):
-    STATE = 'STATE'
+    created = 'Created'
+    finished = 'Finished'
 
 
 class CreateTask(BaseModel):
