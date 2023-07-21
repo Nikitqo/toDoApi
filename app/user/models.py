@@ -1,3 +1,4 @@
+from bson import ObjectId
 from pydantic import BaseModel, EmailStr, SecretStr, field_validator
 
 

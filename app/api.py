@@ -1,24 +1,30 @@
 from typing import List
 from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
 from starlette import status
 from app.user.models import CreateUser, UserLogIn
 import app.tasks.models as models
+from app.mongo_db_script import add_new_user, find_user
 
 app = FastAPI()
 
-
+# пока ручки болванки
 @app.post("/user/create",
           summary='Создает нового пользователя',
           status_code=status.HTTP_200_OK)
 def add_user(user: CreateUser):
-    return {"message": user}
+    encode_user = jsonable_encoder(user)
+    add_new_user(encode_user)
+    return {"data": "Вы успешно зарегистрированы"}
 
 
 @app.post("/user/login",
           summary='Авторизация пользователя',
           status_code=status.HTTP_200_OK)
 def login_user(login: UserLogIn):
-    return {"message": "Вы успешно авторизованы"}
+    encode_user = jsonable_encoder(login)
+    result = find_user(encode_user["email"])
+    return {"data": result}
 
 
 @app.post("/task/create",
