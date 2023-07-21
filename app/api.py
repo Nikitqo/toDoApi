@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from starlette import status
+from app.user.models import CreateUser, UserLogIn
+import app.tasks.models as models
 
 app = FastAPI()
 
@@ -7,41 +9,41 @@ app = FastAPI()
 @app.post("/user/create",
           summary='Создает нового пользователя',
           status_code=status.HTTP_200_OK)
-def root():
-    return {"message": "Hello World"}
+def add_user(user: CreateUser):
+    return {"message": user}
 
 
 @app.post("/user/login",
           summary='Авторизация пользователя',
           status_code=status.HTTP_200_OK)
-def root():
-    return {"message": "Hello World"}
+def login_user(login: UserLogIn):
+    return {"message": "Вы успешно авторизованы"}
 
 
 @app.post("/task/create",
           summary='Создание новой задачи',
           status_code=status.HTTP_200_OK)
-def root():
-    return {"message": "Hello World"}
+def create_task(create: models.CreateTask):
+    return {"message": create}
 
 
 @app.patch("/task/{id}",
            summary='Обновление задачи',
            status_code=status.HTTP_200_OK)
-def update_task(task_id):
-    return {"task_id": task_id}
+def update_task(update: models.UpdateTask):
+    return {"info": update}
 
 
 @app.get("/task",
-            summary='Получение списка задач',
-            status_code=status.HTTP_200_OK)
+         summary='Получение списка задач',
+         status_code=status.HTTP_200_OK)
 def get_list(from_date, to_date):
     return {"from_date": from_date, "to_date": to_date}
 
 
 @app.get("/task/{task_id}",
-            summary='Получение задачи',
-            status_code=status.HTTP_200_OK)
+         summary='Получение задачи',
+         status_code=status.HTTP_200_OK)
 def get_task(task_id):
     return {"task_id": task_id}
 
