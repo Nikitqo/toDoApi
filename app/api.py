@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import FastAPI
 from starlette import status
 from app.user.models import CreateUser, UserLogIn
@@ -29,21 +30,24 @@ def create_task(create: models.CreateTask):
 
 @app.patch("/task/{id}",
            summary='Обновление задачи',
-           status_code=status.HTTP_200_OK)
-def update_task(update: models.UpdateTask):
+           status_code=status.HTTP_200_OK,
+           response_model=models.UpdateTask)
+def update_task(id, update: models.UpdateTask):
     return {"info": update}
 
 
 @app.get("/task",
          summary='Получение списка задач',
-         status_code=status.HTTP_200_OK)
+         status_code=status.HTTP_200_OK,
+         response_model=List[models.Task])
 def get_list(from_date, to_date):
-    return {"from_date": from_date, "to_date": to_date}
+    return {models.Task}
 
 
 @app.get("/task/{task_id}",
          summary='Получение задачи',
-         status_code=status.HTTP_200_OK)
+         status_code=status.HTTP_200_OK,
+         response_model=models.Task)
 def get_task(task_id):
     return {"task_id": task_id}
 
@@ -52,4 +56,4 @@ def get_task(task_id):
             summary='Удаление задачи',
             status_code=status.HTTP_200_OK)
 def delete_task(task_id):
-    return {"task_id": task_id}
+    return {"message": f'Задача: {models.Task.name} - удалена'}
