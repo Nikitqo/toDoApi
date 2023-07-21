@@ -36,12 +36,12 @@ def update_task(id, update: models.UpdateTask):
     return {"info": update}
 
 
-@app.get("/task",
+@app.get("/task/list",
          summary='Получение списка задач',
          status_code=status.HTTP_200_OK,
          response_model=List[models.Task])
 def get_list(from_date, to_date):
-    return {models.Task}
+    return {List[models.Task]}
 
 
 @app.get("/task/{task_id}",
