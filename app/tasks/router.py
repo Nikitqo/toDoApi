@@ -1,7 +1,5 @@
 from typing import List
-
 from fastapi import APIRouter
-
 from app.tasks import CreateTask, UpdateTask, Task
 
 router = APIRouter(
