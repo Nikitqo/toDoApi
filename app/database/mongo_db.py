@@ -1,4 +1,3 @@
-from bson.json_util import dumps
 from pymongo import MongoClient
 
 client = MongoClient('localhost', 27017)

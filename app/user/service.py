@@ -1,8 +1,32 @@
-from app.database.service import add_new_user, find_user
+from fastapi import HTTPException
+from passlib.context import CryptContext
+from app.database import users
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def add_user(user):
-    if add_new_user(user):
-        return {"data": "Вы успешно зарегистрированы"}
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+def add_new_user(data):
+    if find_user_by_email(data.email):
+        user_for_insert = {
+            'username': data.username,
+            'password_hash': get_password_hash(data.password.get_secret_value()),
+            'email': data.email
+        }
+        users.insert_one(user_for_insert)
+        return {"data": f'Пользователь: {data.username} успешно зарегистрирован!'}
     else:
-        return {"data": "Пользователь с данным email уже зарегистрирован"}
+        raise HTTPException(
+            status_code=400,
+            detail=[{"error": f'Пользователь с email: {data.email} уже существует'}]
+        )
+
+
+def find_user_by_email(email):
+    if users.find_one({"email": email}) is None:
+        return True
+    else:
+        return False

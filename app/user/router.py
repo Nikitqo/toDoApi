@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.user import CreateUser, UserLogIn, add_user
+from app.user import CreateUser, UserLogIn, add_new_user
 
 
 router = APIRouter(
@@ -9,8 +9,8 @@ router = APIRouter(
 
 
 @router.post("/create")
-def add_new_user(user: CreateUser):
-    return add_user(user.model_dump())
+def registration_user(user: CreateUser):
+    return add_new_user(user)
 
 
 # @router.post("/login")
