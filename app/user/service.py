@@ -55,7 +55,7 @@ def find_user_by_email(email):
 
 def login_user_by_email(data):
     user = find_user_by_email(data.email)
-    if not find_user_by_email(data.email):
+    if not user:
         raise HTTPException(
             status_code=404,
             detail=[{"error": f'Пользователь с email: {data.email} не существует'}]
