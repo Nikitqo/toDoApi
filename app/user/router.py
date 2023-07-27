@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.user import CreateUser, UserLogIn, add_new_user
+from app.user import CreateUser, UserLogIn, add_new_user, login_user_by_email, Token
 
 
 router = APIRouter(
@@ -13,8 +13,6 @@ def registration_user(user: CreateUser):
     return add_new_user(user)
 
 
-# @router.post("/login")
-# def login_user(login: UserLogIn):
-#     encode_user = jsonable_encoder(login)
-#     result = find_user(encode_user["email"])
-#     return {"data": result}
+@router.post("/login", response_model=Token)
+def login_user(credentials: UserLogIn):
+    return login_user_by_email(credentials)
