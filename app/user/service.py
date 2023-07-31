@@ -1,16 +1,20 @@
 from datetime import datetime, timedelta
-
-from fastapi import HTTPException
+from typing import Annotated
+from fastapi import HTTPException, Depends, status
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from app.database import users
 from jose import JWTError, jwt
 from app.user import Token
+
 # token var
 
 
 SECRET_KEY = "09d25e054faa6ca2552c818166b7a9563b93f7091f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
 
 # crypto var
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -56,19 +60,38 @@ def find_user_by_email(email):
 
 
 def login_user_by_email(data):
-    user = find_user_by_email(data.email)
+    user = find_user_by_email(data.username)
     if not user:
         raise HTTPException(
             status_code=404,
-            detail=[{"error": f'Пользователь с email: {data.email} не существует'}]
+            detail=[{"error": f'Пользователь с email: {data.username} не существует'}]
         )
-    elif not verify_password(data.password.get_secret_value(), user["password_hash"]):
+    elif not verify_password(data.password, user["password_hash"]):
         raise HTTPException(
             status_code=403,
             detail=[{"error": 'Неверный пароль'}]
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": data.email}, expires_delta=access_token_expires
+        data={"sub": data.username}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
+
+
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = find_user_by_email(email=username)
+    if user is None:
+        raise credentials_exception
+    return user
