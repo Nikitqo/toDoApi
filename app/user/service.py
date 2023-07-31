@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from app.database import users
 from jose import JWTError, jwt
 from app.user import Token
+
 # token var
 
 
@@ -85,12 +86,12 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
+        username: str = payload.get("sub")
+        if username is None:
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = find_user_by_email(email)
+    user = find_user_by_email(email=username)
     if user is None:
         raise credentials_exception
     return user
