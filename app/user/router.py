@@ -22,8 +22,8 @@ def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     return login_user_by_email(form_data)
 
 
-# @router.get("/users/me/", response_model=CreateUser)
-# async def read_users_me(
-#     current_user: Annotated[CreateUser, Depends(get_current_user)]
-# ):
-#     return current_user
+@router.get("/users/me/", response_model=CreateUser)
+async def read_users_me(
+    current_user: Annotated[CreateUser, Depends(get_current_user)]
+):
+    return current_user
