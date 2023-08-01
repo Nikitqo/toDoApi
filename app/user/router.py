@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.user import CreateUser, UserLogIn, add_new_user, login_user_by_email, Token, get_current_user
+from app.user import User, add_new_user, login_user_by_email, Token, get_current_user
 
 
 router = APIRouter(
@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 @router.post("/create")
-def registration_user(user: CreateUser):
+def registration_user(user: User):
     return add_new_user(user)
 
 
@@ -24,6 +24,6 @@ def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
 
 @router.get("/me")
 async def read_own_items(
-    current_user: Annotated[CreateUser, Depends(get_current_user)]
+    current_user: Annotated[User, Depends(get_current_user)]
 ):
     return current_user['email']
