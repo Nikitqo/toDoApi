@@ -1,23 +1,14 @@
 from datetime import datetime
-
 import bson
 from fastapi import HTTPException
 from bson import ObjectId
 from app.database import tasks
 from app.tasks import State
+from app.user import verify_user
 
 
 def find_task_by_id(_id):
     return tasks.find_one({"_id": ObjectId(_id)})
-
-
-def verify_user(user_id_from_db, user_id):
-    if user_id_from_db != user_id:
-        raise HTTPException(
-            status_code=403,
-            detail=[{"error": 'Доступ запрещен'}]
-        )
-    return True
 
 
 # main logic
