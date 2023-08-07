@@ -35,7 +35,7 @@ def delete_task_by_id(task_id, user_id):
             tasks.delete_one({'_id': ObjectId(task_id)})
             return {"message": f'Задача: {task["name"]} удалена'}
     except bson.errors.InvalidId:
-        return HTTPException(
+        raise HTTPException(
                 status_code=400,
-                detail=[{f'{task_id} is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string'}]
+                detail=[{"error": f'{task_id} is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string'}]
             )
