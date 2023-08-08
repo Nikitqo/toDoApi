@@ -1,6 +1,6 @@
 from typing import List, Annotated
 from fastapi import APIRouter, Depends
-from app.tasks import CreateTask, UpdateTask, Task, add_new_task
+from app.tasks import CreateTask, UpdateTask, Task, add_new_task, delete_task_by_id
 from app.user import get_current_user
 
 router = APIRouter(
@@ -35,6 +35,9 @@ def create_task(task: CreateTask, auth: Auth):
 #     return {"task_id": task_id}
 #
 #
-# @router.delete("/{task_id}")
-# def delete_task(task_id):
-#     return {"message": f'Задача: {Task.name} - удалена'}
+
+
+@router.delete("/{_id}")
+def delete_task(task_id, auth: Auth):
+    user_id = auth['_id']
+    return delete_task_by_id(task_id, user_id)
