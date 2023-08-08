@@ -6,6 +6,11 @@ from app.database import tasks
 from app.tasks import State
 from app.user import verify_user
 
+exceptions = HTTPException(
+                status_code=400,
+                detail=[{"error": f'not a valid id, it must be a 12-byte input or a 24-character hex string'}]
+            )
+
 
 def find_task_by_id(_id):
     task = tasks.find_one({"_id": ObjectId(_id)})
@@ -37,10 +42,7 @@ def delete_task_by_id(task_id, user_id):
             tasks.delete_one(query)
             return {"message": f'Задача: {task["name"]} удалена'}
     except bson.errors.InvalidId:
-        raise HTTPException(
-                status_code=400,
-                detail=[{"error": f'{task_id} is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string'}]
-            )
+        raise exceptions
 
 
 def update_task_by_id(task_id, data, user_id):
@@ -52,7 +54,14 @@ def update_task_by_id(task_id, data, user_id):
             tasks.update_one(query, new_values)
             return {"message": f'Задача: {task["name"]} обновлена'}
     except bson.errors.InvalidId:
-        raise HTTPException(
-                status_code=400,
-                detail=[{"error": f'{task_id} is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string'}]
-            )
+        raise exceptions
+
+
+def get_task_by_id(task_id, user_id):
+    try:
+        task = find_task_by_id(task_id)
+        if verify_user(task['user_id'], user_id):
+            result = {'id': task_id, **task}
+            return result
+    except bson.errors.InvalidId:
+        raise exceptions
