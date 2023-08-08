@@ -8,7 +8,13 @@ from app.user import verify_user
 
 
 def find_task_by_id(_id):
-    return tasks.find_one({"_id": ObjectId(_id)})
+    task = tasks.find_one({"_id": ObjectId(_id)})
+    if not task:
+        raise HTTPException(
+            status_code=404,
+            detail=[{"error": 'Задача не найдена'}]
+        )
+    return task
 
 
 # main logic
@@ -26,14 +32,25 @@ def add_new_task(task, user_id):
 def delete_task_by_id(task_id, user_id):
     try:
         task = find_task_by_id(task_id)
-        if not task:
-            raise HTTPException(
-                status_code=404,
-                detail=[{"error": 'Задача не найдена'}]
-            )
+        query = {'_id': ObjectId(task_id)}
         if verify_user(task['user_id'], user_id):
-            tasks.delete_one({'_id': ObjectId(task_id)})
+            tasks.delete_one(query)
             return {"message": f'Задача: {task["name"]} удалена'}
+    except bson.errors.InvalidId:
+        raise HTTPException(
+                status_code=400,
+                detail=[{"error": f'{task_id} is not a valid ObjectId, it must be a 12-byte input or a 24-character hex string'}]
+            )
+
+
+def update_task_by_id(task_id, data, user_id):
+    try:
+        task = find_task_by_id(task_id)
+        query = {'_id': ObjectId(task_id)}
+        new_values = {"$set": data.__dict__}
+        if verify_user(task['user_id'], user_id):
+            tasks.update_one(query, new_values)
+            return {"message": f'Задача: {task["name"]} обновлена'}
     except bson.errors.InvalidId:
         raise HTTPException(
                 status_code=400,
