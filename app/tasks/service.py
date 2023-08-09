@@ -42,7 +42,7 @@ def delete_task_by_id(task_id, user_id):
             tasks.delete_one(query)
             return {"message": f'Задача: {task["name"]} удалена'}
     except bson.errors.InvalidId:
-        raise exceptions
+        raise exception
 
 
 def update_task_by_id(task_id, data, user_id):
@@ -54,7 +54,7 @@ def update_task_by_id(task_id, data, user_id):
             tasks.update_one(query, new_values)
             return {"message": f'Задача: {task["name"]} обновлена'}
     except bson.errors.InvalidId:
-        raise exceptions
+        raise exception
 
 
 def get_task_by_id(task_id, user_id):
@@ -64,4 +64,4 @@ def get_task_by_id(task_id, user_id):
             result = {'id': task_id, **task}
             return result
     except bson.errors.InvalidId:
-        raise exceptions
+        raise exception
