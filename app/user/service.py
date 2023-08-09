@@ -94,7 +94,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     user = find_user_by_email(email=username)
     if user is None:
         raise credentials_exception
-    return user
+    return user["_id"]
 
 
 def verify_user(user_id_from_db, user_id):

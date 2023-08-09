@@ -1,6 +1,6 @@
 from typing import List, Annotated
 from fastapi import APIRouter, Depends
-from app.tasks import CreateTask, UpdateTask, Task, add_new_task, delete_task_by_id, update_task_by_id
+from app.tasks import CreateTask, UpdateTask, Task, add_new_task, delete_task_by_id, update_task_by_id, get_task_by_id
 from app.user import get_current_user
 
 router = APIRouter(
@@ -13,20 +13,22 @@ Auth = Annotated[dict, Depends(get_current_user)]
 
 @router.post("/create")
 def create_task(task: CreateTask, auth: Auth):
-    user_id = auth['_id']
-    return add_new_task(task, user_id)
+    return add_new_task(task, auth)
 
 
 @router.patch("/{task_id}")
 def update_task(task_id, update_data: UpdateTask, auth: Auth):
-    user_id = auth['_id']
-    return update_task_by_id(task_id, update_data, user_id)
+    return update_task_by_id(task_id, update_data, auth)
 
 
 @router.delete("/{_id}")
 def delete_task(task_id, auth: Auth):
-    user_id = auth['_id']
-    return delete_task_by_id(task_id, user_id)
+    return delete_task_by_id(task_id, auth)
+
+
+@router.get("/{task_id}", response_model=Task)
+def get_task(task_id, auth: Auth):
+    return get_task_by_id(task_id, auth)
 
 # пример объекта из auth:
 # {'_id': ObjectId('64c3c43a5362fa9473b6ab79'), 'username': 'string', 'password_hash':
@@ -37,6 +39,4 @@ def delete_task(task_id, auth: Auth):
 #     return {List[Task]}
 #
 #
-# @router.get("/{task_id}")
-# def get_task(task_id):
-#     return {"task_id": task_id}
+
