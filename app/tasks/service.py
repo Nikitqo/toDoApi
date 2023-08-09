@@ -25,7 +25,7 @@ def find_task_by_id(_id):
 # main logic
 def add_new_task(task, user_id):
     task_for_insert = {
-        **task.__dict__,
+        **dict(task),
         'state': State.Created,
         'created_at': datetime.utcnow(),
         'user_id': user_id
@@ -49,7 +49,7 @@ def update_task_by_id(task_id, data, user_id):
     try:
         task = find_task_by_id(task_id)
         query = {'_id': ObjectId(task_id)}
-        new_values = {"$set": data.__dict__}
+        new_values = {"$set": dict(data)}
         if verify_user(task['user_id'], user_id):
             tasks.update_one(query, new_values)
             return {"message": f'Задача: {task["name"]} обновлена'}
