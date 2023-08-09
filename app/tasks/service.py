@@ -6,7 +6,7 @@ from app.database import tasks
 from app.tasks import State
 from app.user import verify_user
 
-exceptions = HTTPException(
+exception = HTTPException(
                 status_code=400,
                 detail=[{"error": f'not a valid id, it must be a 12-byte input or a 24-character hex string'}]
             )
