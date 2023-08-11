@@ -29,3 +29,7 @@ class UpdateTask(BaseModel):
     description: Optional[constr(min_length=0, max_length=255)]
     deadline: Optional[datetime]
     state: Optional[State]
+
+
+class TaskList(BaseModel):
+    data: list[Task]

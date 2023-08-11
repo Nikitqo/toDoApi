@@ -17,9 +17,22 @@ def find_task_by_id(_id):
     if not task:
         raise HTTPException(
             status_code=404,
-            detail=[{"error": 'Задача не найдена'}]
+            detail=[{"message": 'Задача не найдена'}]
         )
     return task
+
+
+def find_tasks_by_date(date_from, date_to):
+    # list_task = tasks.find({'user_id': ObjectId(user_id), 'created_at': {'$gte': date_from, '$lte': date_to}})
+    date_from_datetime = datetime.strptime(date_from, '%Y-%m-%d')
+    date_to_datetime = datetime.strptime(date_to, '%Y-%m-%d')
+    list_task = tasks.find({'created_at': {'$gte': date_from_datetime, '$lte': date_to_datetime}})
+    if not list(list_task):
+        raise HTTPException(
+            status_code=404,
+            detail=[{"message": 'Задачи не найдены'}]
+        )
+    return list(list_task)
 
 
 # main logic
@@ -65,3 +78,8 @@ def get_task_by_id(task_id, user_id):
             return result
     except bson.errors.InvalidId:
         raise exception
+
+
+def get_list_task_by_date(date_from, date_to, user_id):
+    list_task = find_tasks_by_date(date_from, date_to)
+    return list_task
