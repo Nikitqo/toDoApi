@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import bson
 from fastapi import HTTPException
 from bson import ObjectId
@@ -22,17 +22,17 @@ def find_task_by_id(_id):
     return task
 
 
-def find_tasks_by_date(date_from, date_to):
-    # list_task = tasks.find({'user_id': ObjectId(user_id), 'created_at': {'$gte': date_from, '$lte': date_to}})
+def find_tasks_by_date(date_from, date_to, user_id):
     date_from_datetime = datetime.strptime(date_from, '%Y-%m-%d')
     date_to_datetime = datetime.strptime(date_to, '%Y-%m-%d')
-    list_task = tasks.find({'created_at': {'$gte': date_from_datetime, '$lte': date_to_datetime}})
-    if not list(list_task):
+    query = tasks.find({'user_id': ObjectId(user_id), 'created_at': {'$gte': date_from_datetime, '$lte': date_to_datetime + timedelta(days=1)}}, {"user_id": 0})
+    list_task = [i for i in query]
+    if not list_task:
         raise HTTPException(
             status_code=404,
             detail=[{"message": 'Задачи не найдены'}]
         )
-    return list(list_task)
+    return list_task
 
 
 # main logic
@@ -74,12 +74,11 @@ def get_task_by_id(task_id, user_id):
     try:
         task = find_task_by_id(task_id)
         if verify_user(task['user_id'], user_id):
-            result = {'id': task_id, **task}
-            return result
+            return task
     except bson.errors.InvalidId:
         raise exception
 
 
 def get_list_task_by_date(date_from, date_to, user_id):
-    list_task = find_tasks_by_date(date_from, date_to)
+    list_task = find_tasks_by_date(date_from, date_to, user_id)
     return list_task
