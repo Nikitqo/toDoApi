@@ -80,5 +80,4 @@ def get_task_by_id(task_id, user_id):
 
 
 def get_list_task_by_date(date_from, date_to, user_id):
-    list_task = find_tasks_by_date(date_from, date_to, user_id)
-    return list_task
+    return find_tasks_by_date(date_from, date_to, user_id)
