@@ -1,7 +1,8 @@
-from pydantic import BaseModel, EmailStr, constr
+from pydantic import BaseModel, constr
 from datetime import datetime
 from typing import Optional
 from enum import Enum
+from app.core import ApiModel
 
 
 class State(str, Enum):
@@ -9,19 +10,18 @@ class State(str, Enum):
     Finished = 'Finished'
 
 
+class Task(ApiModel):
+    name: constr(min_length=3, max_length=255)
+    description: constr(min_length=0, max_length=255)
+    deadline: datetime
+    state: State
+    created_at: datetime
+
+
 class CreateTask(BaseModel):
     name: constr(min_length=3, max_length=255)
     description: constr(min_length=0, max_length=255)
     deadline: datetime
-
-
-class Task(BaseModel):
-    id: str
-    name: constr(min_length=3, max_length=255)
-    description: constr(min_length=0, max_length=255)
-    deadline: datetime
-    state: str
-    created_at: datetime
 
 
 class UpdateTask(BaseModel):
