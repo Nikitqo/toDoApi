@@ -8,6 +8,14 @@ client = TestClient(app)
 
 
 @pytest.fixture(scope='function')
-def delete_user(email='api_test@test.com'):
+def sign_up():
+    response = client.post("/user/create",
+                           json={"username": "api_test", "email": 'api_test@test.com', "password": "12345678"})
+    yield response
+
+
+@pytest.fixture(scope='function')
+def delete_user():
+    email = 'api_test@test.com'
     yield
     delete_user_by_email(email)
