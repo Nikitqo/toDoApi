@@ -4,16 +4,12 @@ from tests.conftest import client
 class TestSignUpPositive:
 
     def test_success_sign_up(self, sign_up):
-        response_status_code = sign_up.status_code
-        response_json = sign_up.json()
-        assert response_status_code == 200
-        assert response_json == {'data': 'Пользователь: api_test успешно зарегистрирован!'}
+        assert sign_up.status_code == 200
+        assert sign_up.json() == {'data': 'Пользователь: api_test успешно зарегистрирован!'}
 
     def test_sign_up_has_user(self, sign_up, delete_user):
-        response_status_code = sign_up.status_code
-        response_json = sign_up.json()
-        assert response_status_code == 400
-        assert response_json == {'detail': [{'error': 'Пользователь с email: api_test@test.com уже существует'}]}
+        assert sign_up.status_code == 400
+        assert sign_up.json() == {'detail': [{'error': 'Пользователь с email: api_test@test.com уже существует'}]}
 
 
 class TestSignUpNegative:
