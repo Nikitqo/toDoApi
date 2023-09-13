@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Annotated
+import bson
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from app.database import users
 from jose import JWTError, jwt
 from app.user import Token
-
+from bson import ObjectId
 # token var
-
 
 SECRET_KEY = "09d25e054faa6ca2552c818166b7a9563b93f7091f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
@@ -18,6 +18,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="user/login")
 
 # crypto var
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+exception = HTTPException(
+                status_code=400,
+                detail=[{"error": f'not a valid id, it must be a 12-byte input or a 24-character hex string'}]
+            )
 
 
 def get_password_hash(password):
@@ -104,3 +109,10 @@ def verify_user(user_id_from_db, user_id):
             detail=[{"error": 'Доступ запрещен'}]
         )
     return True
+
+
+def delete_user_by_email(email):
+    _id = find_user_by_email(email)['_id']
+    username = find_user_by_email(email)['username']
+    users.delete_one({"_id": ObjectId(_id)})
+    return {"message:" f'Пользователь {username} удален'}
