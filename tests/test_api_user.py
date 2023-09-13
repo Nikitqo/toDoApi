@@ -1,3 +1,5 @@
+import pytest
+
 from tests.conftest import client
 
 
@@ -13,13 +15,10 @@ class TestSignUpPositive:
 
 
 class TestSignUpNegative:
-
-    def test_sign_up_short_password(self):
+    @pytest.mark.parametrize('email, password',
+                             [('api_test@test.com', "1234"),
+                              ('api_test', '12345678')])
+    def test_sign_up_with_short_password_or_invalid_email(self, email, password):
         response = client.post("/user/create",
-                               json={"username": "api_test", "email": "api_test@test.com", "password": "1234"})
-        assert response.status_code == 422
-
-    def test_sign_up_not_valid_email(self):
-        response = client.post("/user/create",
-                               json={"username": "api_test", "email": "api_test", "password": "12345678"})
+                               json={"username": "api_test", "email": email, "password": password})
         assert response.status_code == 422
