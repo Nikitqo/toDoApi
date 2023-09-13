@@ -3,7 +3,7 @@ import pytest
 from tests.conftest import client
 
 
-class TestSignUpPositive:
+class TestSignUp:
 
     def test_success_sign_up(self, sign_up):
         assert sign_up.status_code == 200
@@ -13,8 +13,6 @@ class TestSignUpPositive:
         assert sign_up.status_code == 400
         assert sign_up.json() == {'detail': [{'error': 'Пользователь с email: api_test@test.com уже существует'}]}
 
-
-class TestSignUpNegative:
     @pytest.mark.parametrize('email, password',
                              [('api_test@test.com', "1234"),
                               ('api_test', '12345678')])
