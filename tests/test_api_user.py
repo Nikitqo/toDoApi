@@ -15,9 +15,9 @@ class TestSignUpPositive:
 class TestSignUpNegative:
 
     def test_sign_up_short_password(self):
-        response_short_password = client.post("/user/create",
+        response = client.post("/user/create",
                                json={"username": "api_test", "email": "api_test@test.com", "password": "1234"})
-        assert response_short_password.status_code == 422
+        assert response.status_code == 422
 
     def test_sign_up_not_valid_email(self):
         response = client.post("/user/create",

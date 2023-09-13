@@ -11,7 +11,7 @@ client = TestClient(app)
 def sign_up():
     response = client.post("/user/create",
                            json={"username": "api_test", "email": 'api_test@test.com', "password": "12345678"})
-    yield response
+    return response
 
 
 @pytest.fixture(scope='function')
