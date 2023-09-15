@@ -1,10 +1,17 @@
 import pytest
 from fastapi.testclient import TestClient
 from app.api import app
-from app.user import delete_user_by_email
 
 
 client = TestClient(app)
+
+
+def get_auth_headers(credentials):
+    response = client.post("/user/login", data=credentials)
+    print(credentials)
+    token = response.json()
+    print(token)
+    return {'authorization': f'{token["token_type"]} {token["access_token"]}'}
 
 
 @pytest.fixture(scope='function')
@@ -16,6 +23,8 @@ def sign_up():
 
 @pytest.fixture(scope='function')
 def delete_user():
-    email = 'api_test@test.com'
+    credentials = {'username': 'api_test@test.com', 'password': '12345678'}
+    headers = get_auth_headers(credentials)
+    params = {'email': credentials['username']}
     yield
-    delete_user_by_email(email)
+    client.delete("/user/delete", params=params, headers=headers)

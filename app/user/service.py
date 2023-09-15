@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import Annotated
-import bson
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
@@ -22,6 +21,11 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 exception = HTTPException(
                 status_code=400,
                 detail=[{"error": f'not a valid id, it must be a 12-byte input or a 24-character hex string'}]
+            )
+
+user_exception = HTTPException(
+                status_code=400,
+                detail=[{"error": f'User not found'}]
             )
 
 
@@ -111,8 +115,14 @@ def verify_user(user_id_from_db, user_id):
     return True
 
 
-def delete_user_by_email(email):
-    _id = find_user_by_email(email)['_id']
-    username = find_user_by_email(email)['username']
-    users.delete_one({"_id": ObjectId(_id)})
-    return {"message:" f'Пользователь {username} удален'}
+def delete_user_by_email(email, user_id):
+    try:
+        user = find_user_by_email(email)
+        _id = user['_id']
+        username = user['username']
+        if verify_user(_id, user_id):
+            users.delete_one({"_id": ObjectId(_id)})
+            return {"message:" f'Пользователь {username} удален'}
+    except TypeError:
+        raise user_exception
+
