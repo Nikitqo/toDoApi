@@ -6,7 +6,7 @@ class TestSignUp:
 
     def test_success_sign_up(self, sign_up):
         assert sign_up.status_code == 200
-        assert sign_up.json() == {'data': 'Пользователь: api_test успешно зарегистрирован!'}
+        assert sign_up.json() == {'message': 'Пользователь: api_test успешно зарегистрирован!'}
 
     def test_sign_up_has_user(self, sign_up, delete_user):
         assert sign_up.status_code == 400

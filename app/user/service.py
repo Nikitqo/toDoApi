@@ -61,7 +61,7 @@ def add_new_user(data):
         'email': data.email
     }
     users.insert_one(user_for_insert)
-    return {"data": f'Пользователь: {data.username} успешно зарегистрирован!'}
+    return {"message": f'Пользователь: {data.username} успешно зарегистрирован!'}
 
 
 def find_user_by_email(email):
@@ -122,7 +122,7 @@ def delete_user_by_email(email, user_id):
         username = user['username']
         if verify_user(_id, user_id):
             users.delete_one({"_id": ObjectId(_id)})
-            return {"message:" f'Пользователь {username} удален'}
+            return {"message": f'Пользователь {username} удален'}
     except TypeError:
         raise user_exception
 
