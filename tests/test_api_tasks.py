@@ -23,8 +23,10 @@ class TestCrudTask:
         assert response.json() == {'message': 'Задача: test task обновлена'}
 
     def test_get_list_task(self, login_user, prepare_task):
-        date_str = prepare_task.json()['created_at'][:10]
-        params = {'date_from': date_str, 'date_to': date_str}
+        date_str = prepare_task.json()['created_at']
+        date_obj = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
+        date = str(date_obj.date())
+        params = {'date_from': date, 'date_to': date}
         response = client.get("/task/list/by-date", params=params, headers=login_user)
         assert response.status_code == 200
         assert response.json() == [prepare_task.json()]
