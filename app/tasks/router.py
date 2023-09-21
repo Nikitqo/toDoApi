@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from app.tasks import CreateTask, UpdateTask, Task, add_new_task, \
-    delete_task_by_id, update_task_by_id, get_task_by_id, get_list_task_by_date
+    delete_task_by_id, update_task_by_id, get_task_by_id, get_list_task_by_date, MessageResponse
 from app.user import get_current_user
 
 router = APIRouter(
@@ -17,7 +17,7 @@ def create_task(task: CreateTask, auth: Auth):
     return add_new_task(task, auth)
 
 
-@router.patch("/{id}/update")
+@router.patch("/{id}/update", response_model=MessageResponse)
 def update_task(task_id, update_data: UpdateTask, auth: Auth):
     return update_task_by_id(task_id, update_data, auth)
 
