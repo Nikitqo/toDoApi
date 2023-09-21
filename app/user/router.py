@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from app.user import User, add_new_user, login_user_by_email, Token, get_current_user, delete_user_by_email
+from app.user import User, add_new_user, login_user_by_email, Token, get_current_user, delete_user_by_email, MessageResponse
 
 router = APIRouter(
     prefix='/user',
@@ -11,7 +11,7 @@ router = APIRouter(
 Auth = Annotated[dict, Depends(get_current_user)]
 
 
-@router.post("/create")
+@router.post("/create", response_model=MessageResponse)
 def registration_user(user: User):
     return add_new_user(user)
 
@@ -21,6 +21,6 @@ def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
     return login_user_by_email(form_data)
 
 
-@router.delete("/delete")
+@router.delete("/delete", response_model=MessageResponse)
 def delete_user(email, auth: Auth):
     return delete_user_by_email(email, auth)
