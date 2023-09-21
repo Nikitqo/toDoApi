@@ -32,6 +32,6 @@ def get_list_task(date_from, date_to, auth: Auth):
     return get_list_task_by_date(date_from, date_to, auth)
 
 
-@router.delete("/{id}/delete")
+@router.delete("/{id}/delete", response_model=MessageResponse)
 def delete_task(task_id, auth: Auth):
     return delete_task_by_id(task_id, auth)
