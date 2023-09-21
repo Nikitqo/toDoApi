@@ -57,7 +57,7 @@ class TestCrudTask:
         response = client.get("/task/list/by-date", params=params, headers=login_user)
         assert response.status_code == 404
 
-    def test_delete_not_found_task(self, login_user):
+    def test_delete_not_found_task(self, login_user, delete_user):
         params = {'task_id': generate()}
         response = client.delete("/task/{id}/delete", params=params, headers=login_user)
         assert response.status_code == 404
