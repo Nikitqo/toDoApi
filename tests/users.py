@@ -1,0 +1,1 @@
+test_user = {"username": "api_test", "email": 'api_test@test.com', "password": "12345678"}

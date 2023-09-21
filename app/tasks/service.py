@@ -43,8 +43,8 @@ def add_new_task(task, user_id):
         'created_at': datetime.utcnow(),
         'user_id': user_id
     }
-    tasks.insert_one(task_for_insert)
-    return {"message": f'Задача: {task.name} создана'}
+    task_id = tasks.insert_one(task_for_insert)
+    return find_task_by_id(task_id.inserted_id)
 
 
 def delete_task_by_id(task_id, user_id):

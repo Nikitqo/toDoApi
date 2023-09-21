@@ -12,17 +12,17 @@ router = APIRouter(
 Auth = Annotated[dict, Depends(get_current_user)]
 
 
-@router.post("/create")
+@router.post("/create", response_model=Task)
 def create_task(task: CreateTask, auth: Auth):
     return add_new_task(task, auth)
 
 
-@router.patch("/{task_id}/update")
+@router.patch("/{id}/update")
 def update_task(task_id, update_data: UpdateTask, auth: Auth):
     return update_task_by_id(task_id, update_data, auth)
 
 
-@router.get("/{task_id}/get", response_model=Task)
+@router.get("/{id}/get", response_model=Task)
 def get_task(task_id, auth: Auth):
     return get_task_by_id(task_id, auth)
 
@@ -32,6 +32,6 @@ def get_list_task(date_from, date_to, auth: Auth):
     return get_list_task_by_date(date_from, date_to, auth)
 
 
-@router.delete("/{_id}/delete")
+@router.delete("/{id}/delete")
 def delete_task(task_id, auth: Auth):
     return delete_task_by_id(task_id, auth)
