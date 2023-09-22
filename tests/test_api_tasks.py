@@ -1,6 +1,7 @@
 from datetime import datetime
 from app.tasks import State
 from tests.conftest import client
+from random_object_id import generate
 
 
 class TestCrudTask:
@@ -37,3 +38,26 @@ class TestCrudTask:
         response = client.delete("/task/{id}/delete", params=params, headers=login_user)
         assert response.status_code == 200
         assert response.json() == {'message': 'Задача: test task удалена'}
+
+    def test_get_not_found_task(self, login_user):
+        params = {'task_id': generate()}
+        response = client.get("/task/{id}/get", params=params, headers=login_user)
+        assert response.status_code == 404
+
+    def test_update_not_found_task(self, login_user):
+        params = {'task_id': generate()}
+        response = client.patch("/task/{id}/update", json={"name": "new name", "description": "new descriprion",
+                                 "deadline": str(datetime.now()), "state": State.Finished}, params=params, headers=login_user)
+        assert response.status_code == 404
+
+    def test_get_list_not_found_task(self, login_user):
+        date_obj = datetime.now()
+        date = str(date_obj.date())
+        params = {'date_from': date, 'date_to': date}
+        response = client.get("/task/list/by-date", params=params, headers=login_user)
+        assert response.status_code == 404
+
+    def test_delete_not_found_task(self, login_user, delete_user):
+        params = {'task_id': generate()}
+        response = client.delete("/task/{id}/delete", params=params, headers=login_user)
+        assert response.status_code == 404
