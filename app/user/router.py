@@ -12,15 +12,15 @@ Auth = Annotated[dict, Depends(get_current_user)]
 
 
 @router.post("/create", response_model=MessageResponse)
-def registration_user(user: User):
-    return add_new_user(user)
+async def registration_user(user: User):
+    return await add_new_user(user)
 
 
 @router.post("/login", response_model=Token)
-def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    return login_user_by_email(form_data)
+async def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    return await login_user_by_email(form_data)
 
 
 @router.delete("/delete", response_model=MessageResponse)
-def delete_user(email, auth: Auth):
-    return delete_user_by_email(email, auth)
+async def delete_user(email, auth: Auth):
+    return await delete_user_by_email(email, auth)
