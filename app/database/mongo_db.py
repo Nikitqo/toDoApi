@@ -1,6 +1,8 @@
-from pymongo import MongoClient
+import motor.motor_asyncio
 
-client = MongoClient('localhost', 27017)
+
+client = motor.motor_asyncio.AsyncIOMotorClient('localhost', 27017)
+# client = MongoClient('localhost', 27017) // not async client
 
 # Connect to our database
 db = client['to_do_api']
