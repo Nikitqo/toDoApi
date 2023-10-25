@@ -7,6 +7,7 @@ from app.database import users
 from jose import JWTError, jwt
 from app.user import Token
 from bson import ObjectId
+
 # token var
 
 SECRET_KEY = "09d25e054faa6ca2552c818166b7a9563b93f7091f6f0f4caa6cf63b88e8d3e7"
@@ -49,8 +50,8 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 # main logic
-def add_new_user(data):
-    if find_user_by_email(data.email):
+async def add_new_user(data):
+    if await find_user_by_email(data.email):
         raise HTTPException(
             status_code=400,
             detail=[{"error": f'Пользователь с email: {data.email} уже существует'}]
@@ -60,16 +61,16 @@ def add_new_user(data):
         'password_hash': get_password_hash(data.password.get_secret_value()),
         'email': data.email
     }
-    users.insert_one(user_for_insert)
+    await users.insert_one(user_for_insert)
     return {"message": f'Пользователь: {data.username} успешно зарегистрирован!'}
 
 
-def find_user_by_email(email):
-    return users.find_one({"email": email})
+async def find_user_by_email(email):
+    return await users.find_one({"email": email})
 
 
-def login_user_by_email(data):
-    user = find_user_by_email(data.username)
+async def login_user_by_email(data):
+    user = await find_user_by_email(data.username)
     if not user:
         raise HTTPException(
             status_code=404,
@@ -87,7 +88,7 @@ def login_user_by_email(data):
     return Token(access_token=access_token, token_type="bearer")
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -100,7 +101,7 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = find_user_by_email(email=username)
+    user = await find_user_by_email(email=username)
     if user is None:
         raise credentials_exception
     return user["_id"]
@@ -115,13 +116,13 @@ def verify_user(user_id_from_db, user_id):
     return True
 
 
-def delete_user_by_email(email, user_id):
+async def delete_user_by_email(email, user_id):
     try:
-        user = find_user_by_email(email)
+        user = await find_user_by_email(email)
         _id = user['_id']
         username = user['username']
         if verify_user(_id, user_id):
-            users.delete_one({"_id": ObjectId(_id)})
+            await users.delete_one({"_id": ObjectId(_id)})
             return {"message": f'Пользователь {username} удален'}
     except TypeError:
         raise user_exception
