@@ -30,15 +30,15 @@ user_exception = HTTPException(
             )
 
 
-async def get_password_hash(password):
+def get_password_hash(password):
     return pwd_context.hash(password)  # хешируем пароль
 
 
-async def verify_password(plain_password, hashed_password):
+def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)  # сравниваем введенный пароль с хешированным
 
 
-async def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -58,7 +58,7 @@ async def add_new_user(data):
         )
     user_for_insert = {
         'username': data.username,
-        'password_hash': await get_password_hash(data.password.get_secret_value()),
+        'password_hash': get_password_hash(data.password.get_secret_value()),
         'email': data.email
     }
     await users.insert_one(user_for_insert)
@@ -76,13 +76,13 @@ async def login_user_by_email(data):
             status_code=404,
             detail=[{"error": f'Пользователь с email: {data.username} не существует'}]
         )
-    elif not await verify_password(data.password, user["password_hash"]):
+    elif not verify_password(data.password, user["password_hash"]):
         raise HTTPException(
             status_code=403,
             detail=[{"error": 'Неверный пароль'}]
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = await create_access_token(
+    access_token = create_access_token(
         data={"sub": data.username}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
@@ -107,7 +107,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     return user["_id"]
 
 
-async def verify_user(user_id_from_db, user_id):
+def verify_user(user_id_from_db, user_id):
     if user_id_from_db != user_id:
         raise HTTPException(
             status_code=403,
