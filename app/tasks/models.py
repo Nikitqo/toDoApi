@@ -1,3 +1,4 @@
+from bson import ObjectId
 from pydantic import BaseModel, constr
 from datetime import datetime
 from typing import Optional
@@ -11,6 +12,7 @@ class State(str, Enum):
 
 
 class Task(ApiModel):
+    _id: ObjectId
     name: constr(min_length=3, max_length=255)
     description: constr(min_length=0, max_length=255)
     deadline: datetime

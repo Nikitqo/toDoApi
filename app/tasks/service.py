@@ -12,8 +12,8 @@ exception = HTTPException(
             )
 
 
-def find_task_by_id(_id):
-    task = tasks.find_one({"_id": ObjectId(_id)})
+async def find_task_by_id(_id):
+    task = await tasks.find_one({"_id": ObjectId(_id)})
     if not task:
         raise HTTPException(
             status_code=404,
@@ -22,62 +22,61 @@ def find_task_by_id(_id):
     return task
 
 
-def find_tasks_by_date(date_from, date_to, user_id):
+async def find_tasks_by_date(date_from, date_to, user_id):
     date_from_datetime = datetime.strptime(date_from, '%Y-%m-%d')
     date_to_datetime = datetime.strptime(date_to, '%Y-%m-%d')
-    query = tasks.find({'user_id': ObjectId(user_id), 'created_at': {'$gte': date_from_datetime, '$lte': date_to_datetime + timedelta(days=1)}}, {"user_id": 0})
-    list_task = [i for i in query]
-    if not list_task:
+    task_list = await tasks.find({'user_id': ObjectId(user_id), 'created_at': {'$gte': date_from_datetime, '$lte': date_to_datetime + timedelta(days=1)}}, {"user_id": 0}).to_list(None)
+    if not task_list:
         raise HTTPException(
             status_code=404,
             detail=[{"message": 'Задачи не найдены'}]
         )
-    return list_task
+    return task_list
 
 
 # main logic
-def add_new_task(task, user_id):
+async def add_new_task(task, user_id):
     task_for_insert = {
         **dict(task),
         'state': State.Created,
         'created_at': datetime.utcnow(),
         'user_id': user_id
     }
-    task_id = tasks.insert_one(task_for_insert)
-    return find_task_by_id(task_id.inserted_id)
+    task_id = await tasks.insert_one(task_for_insert)
+    return await find_task_by_id(task_id.inserted_id)
 
 
-def delete_task_by_id(task_id, user_id):
+async def delete_task_by_id(task_id, user_id):
     try:
-        task = find_task_by_id(task_id)
+        task = await find_task_by_id(task_id)
         query = {'_id': ObjectId(task_id)}
         if verify_user(task['user_id'], user_id):
-            tasks.delete_one(query)
+            await tasks.delete_one(query)
             return {"message": f'Задача: {task["name"]} удалена'}
     except bson.errors.InvalidId:
         raise exception
 
 
-def update_task_by_id(task_id, data, user_id):
+async def update_task_by_id(task_id, data, user_id):
     try:
-        task = find_task_by_id(task_id)
+        task = await find_task_by_id(task_id)
         query = {'_id': ObjectId(task_id)}
         new_values = {"$set": dict(data)}
         if verify_user(task['user_id'], user_id):
-            tasks.update_one(query, new_values)
+            await tasks.update_one(query, new_values)
             return {"message": f'Задача: {task["name"]} обновлена'}
     except bson.errors.InvalidId:
         raise exception
 
 
-def get_task_by_id(task_id, user_id):
+async def get_task_by_id(task_id, user_id):
     try:
-        task = find_task_by_id(task_id)
+        task = await find_task_by_id(task_id)
         if verify_user(task['user_id'], user_id):
             return task
     except bson.errors.InvalidId:
         raise exception
 
 
-def get_list_task_by_date(date_from, date_to, user_id):
-    return find_tasks_by_date(date_from, date_to, user_id)
+async def get_list_task_by_date(date_from, date_to, user_id):
+    return await find_tasks_by_date(date_from, date_to, user_id)
