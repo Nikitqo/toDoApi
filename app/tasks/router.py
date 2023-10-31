@@ -13,25 +13,25 @@ Auth = Annotated[dict, Depends(get_current_user)]
 
 
 @router.post("/create", response_model=Task)
-def create_task(task: CreateTask, auth: Auth):
-    return add_new_task(task, auth)
+async def create_task(task: CreateTask, auth: Auth):
+    return await add_new_task(task, auth)
 
 
 @router.patch("/{id}/update", response_model=MessageResponse)
-def update_task(task_id, update_data: UpdateTask, auth: Auth):
-    return update_task_by_id(task_id, update_data, auth)
+async def update_task(task_id, update_data: UpdateTask, auth: Auth):
+    return await update_task_by_id(task_id, update_data, auth)
 
 
 @router.get("/{id}/get", response_model=Task)
-def get_task(task_id, auth: Auth):
-    return get_task_by_id(task_id, auth)
+async def get_task(task_id, auth: Auth):
+    return await get_task_by_id(task_id, auth)
 
 
 @router.get("/list/by-date", response_model=list[Task])
-def get_list_task(date_from, date_to, auth: Auth):
-    return get_list_task_by_date(date_from, date_to, auth)
+async def get_list_task(date_from, date_to, auth: Auth):
+    return await get_list_task_by_date(date_from, date_to, auth)
 
 
 @router.delete("/{id}/delete", response_model=MessageResponse)
-def delete_task(task_id, auth: Auth):
-    return delete_task_by_id(task_id, auth)
+async def delete_task(task_id, auth: Auth):
+    return await delete_task_by_id(task_id, auth)
