@@ -46,3 +46,14 @@ async def prepare_task(client: AsyncClient, get_auth_headers: dict):
     params = {'task_id': response.json()['_id']}
     yield response
     await client.delete("/task/{id}/delete", params=params, headers=get_auth_headers)
+
+
+@pytest.fixture
+async def prepare_board(client: AsyncClient, get_auth_headers: dict):
+    response = await client.post("/board/create",
+                                 json={"name": "test board", "description": "test descriprion",
+                                       "visible": "Public", "columns": ["to do"], "company": "test company"},
+                                 headers=get_auth_headers)
+    params = {'board_id': response.json()['_id']}
+    yield response
+    await client.delete("/board/{id}/delete", params=params, headers=get_auth_headers)
