@@ -1,48 +1,48 @@
 from datetime import datetime
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from app.api import app
 from tests.users import test_user
 
-client = TestClient(app)
+
+@pytest.fixture(scope="session")
+def anyio_backend():
+    return "asyncio"
 
 
-def get_auth_headers():
+@pytest.fixture(scope="session")
+async def client():
+    async with AsyncClient(app=app, base_url="http://localhost:8000") as client:
+        print("Client is ready")
+        yield client
+
+
+@pytest.fixture(scope='session')
+async def get_auth_headers(client):
     credentials = {'username': test_user['email'], 'password': test_user['password']}
-    response = client.post("/user/login", data=credentials)
+    response = await client.post("/user/login", data=credentials)
     token = response.json()
     return {'authorization': f'{token["token_type"]} {token["access_token"]}'}
 
 
-@pytest.fixture(scope='function')
-def sign_up():
-    response = client.post("/user/create",
-                           json=test_user)
-    return response
-
-
-@pytest.fixture(scope='function')
-def delete_user():
-    headers = get_auth_headers()
+@pytest.fixture(scope='session')
+async def delete_user(client: AsyncClient, get_auth_headers: dict):
     params = {'email': test_user['email']}
     yield
-    client.delete("/user/delete", params=params, headers=headers)
+    await client.delete("/user/delete", params=params, headers=get_auth_headers)
 
 
-@pytest.fixture(scope='function')
-def login_user():
-    credentials = {'username': test_user['email'], 'password': test_user['password']}
-    response = client.post("/user/login", data=credentials)
-    token = response.json()
-    return {'authorization': f'{token["token_type"]} {token["access_token"]}'}
+@pytest.fixture(scope='session')
+async def create_user(client: AsyncClient):
+    await client.post("/user/create", json=test_user)
 
 
-@pytest.fixture(scope='function')
-def prepare_task():
-    headers = get_auth_headers()
-    response = client.post("/task/create",
+@pytest.fixture
+async def prepare_task(client: AsyncClient, get_auth_headers: dict):
+    response = await client.post("/task/create",
                            json={"name": "test task", "description": "test descriprion",
-                                 "deadline": str(datetime.now())}, headers=headers)
-    yield response
+                                 "deadline": str
+                                 (datetime.now())}, headers=get_auth_headers)
     params = {'task_id': response.json()['_id']}
-    client.delete("/task/{id}/delete", params=params, headers=headers)
+    yield response
+    await client.delete("/task/{id}/delete", params=params, headers=get_auth_headers)
