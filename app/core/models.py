@@ -1,5 +1,6 @@
 from bson import ObjectId
 from pydantic import BaseModel, Field
+from pydantic_mongo import ObjectIdField
 
 
 class PyObjectId(ObjectId):
@@ -19,7 +20,7 @@ class PyObjectId(ObjectId):
 
 
 class ApiModel(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId(), alias='_id')
+    id: ObjectIdField = Field(alias='_id')
 
     class Config:
         allow_population_by_field_name = True

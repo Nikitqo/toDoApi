@@ -1,4 +1,4 @@
-from bson import ObjectId
+from bson.objectid import ObjectId
 from pydantic import BaseModel, constr
 from datetime import datetime
 from typing import Optional
