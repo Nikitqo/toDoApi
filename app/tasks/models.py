@@ -1,5 +1,5 @@
 from bson.objectid import ObjectId
-from pydantic import BaseModel, constr, Field
+from pydantic import BaseModel, constr
 from datetime import datetime
 from typing import Optional
 from enum import Enum
