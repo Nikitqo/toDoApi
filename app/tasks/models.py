@@ -3,7 +3,7 @@ from pydantic import BaseModel, constr, Field
 from datetime import datetime
 from typing import Optional
 from enum import Enum
-from pydantic_mongo import ObjectIdField
+from app.core import ApiModel
 
 
 class State(str, Enum):
@@ -11,19 +11,13 @@ class State(str, Enum):
     Finished = 'Finished'
 
 
-class Task(BaseModel):
-    id: ObjectIdField = Field(alias='_id')
+class Task(ApiModel):
+    _id: ObjectId
     name: constr(min_length=3, max_length=255)
     description: constr(min_length=0, max_length=255)
     deadline: datetime
     state: State
     created_at: datetime
-
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {
-            ObjectId: str
-        }
 
 
 class CreateTask(BaseModel):
