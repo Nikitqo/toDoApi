@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, constr, Field
 from typing import Optional
 from enum import Enum
-from app.core import ApiModel
+from pydantic_mongo import ObjectIdField
 
 
 class Visible(str, Enum):
@@ -18,6 +18,6 @@ class BaseBoard(BaseModel):
     company: str
 
 
-class Board(BaseBoard, ApiModel):
-    _id: ApiModel
+class Board(BaseBoard):
+    id: ObjectIdField = Field(alias='_id')
     created_at: datetime
