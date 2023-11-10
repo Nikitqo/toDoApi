@@ -1,5 +1,5 @@
 from bson.objectid import ObjectId
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, Field
 from datetime import datetime
 from typing import Optional
 from enum import Enum
@@ -28,9 +28,9 @@ class CreateTask(BaseModel):
 
 class UpdateTask(BaseModel):
     name: Optional[constr(min_length=3, max_length=255)]
-    description: Optional[constr(min_length=0, max_length=255)]
-    deadline: Optional[datetime]
-    state: Optional[State]
+    description: Optional[str] = Field(None, min_length=3, max_length=255)
+    deadline: Optional[datetime] = Field(None)
+    state: Optional[State] = Field(None)
 
 
 class MessageResponse(BaseModel):
