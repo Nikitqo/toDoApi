@@ -4,6 +4,7 @@ from fastapi import HTTPException
 from bson import ObjectId
 from app.database import boards
 from app.user import verify_user
+from .models import Roles
 
 exception = HTTPException(
                 status_code=400,
@@ -25,7 +26,7 @@ async def find_board_by_id(id):
 
 async def create_board(board, user_id):
     board_for_insert = board.model_dump()
-    board_for_insert.update({'created_at': datetime.utcnow(), 'user_id': user_id})
+    board_for_insert.update({'created_at': datetime.utcnow(), 'user_id': user_id, 'users': {str(user_id): Roles.Admin}})
     new_board = await boards.insert_one(board_for_insert)
     return await find_board_by_id(new_board.inserted_id)
 
