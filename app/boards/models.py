@@ -26,4 +26,9 @@ class BaseBoard(BaseModel):
 class Board(BaseBoard):
     id: ObjectIdField = Field(alias='_id')
     created_at: datetime
-    users: dict
+    users: list
+
+
+class BoardUsers(BaseModel):
+    id: str
+    role: Roles

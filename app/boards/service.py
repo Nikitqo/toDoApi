@@ -3,17 +3,37 @@ import bson
 from fastapi import HTTPException
 from bson import ObjectId
 from app.database import boards
-from app.user import verify_user
+from app.user import verify_user, find_user_by_id
 from .models import Roles
 
-exception = HTTPException(
+not_valid_id_exception = HTTPException(
                 status_code=400,
                 detail=[{"error": f'not a valid id, it must be a 12-byte input or a 24-character hex string'}]
             )
 
+has_admin_exception = HTTPException(
+                status_code=400,
+                detail=[{"message": 'Обновляемый пользователь имеет роль Admin'}]
+            )
 
-async def find_board_by_id(id):
-    board = await boards.find_one({"_id": ObjectId(id)})
+access_exception = HTTPException(
+                    status_code=403,
+                    detail=[{"error": 'Доступ запрещен'}]
+                )
+
+has_user_exception = HTTPException(
+            status_code=400,
+            detail=[{"error": 'Пользователь уже добавлен'}]
+        )
+
+nof_found_user_exception = HTTPException(
+            status_code=404,
+            detail=[{"error": 'Пользователь не найден'}]
+        )
+
+
+async def find_board_by_id(board_id):
+    board = await boards.find_one({"_id": ObjectId(board_id)})
     if not board:
         raise HTTPException(
             status_code=404,
@@ -22,21 +42,67 @@ async def find_board_by_id(id):
     return board
 
 
+async def get_admin_from_board(board, user_id):
+    for i in board["users"]:
+        if i["id"] == str(user_id):
+            if i["role"] != "Admin":
+                raise access_exception
+    return True
+
+
+async def get_user_from_board(board, user_id):
+    for i in board["users"]:
+        if i["id"] == str(user_id):
+            return True
+    return False
+
+
 # main logic
 
 async def create_board(board, user_id):
     board_for_insert = board.model_dump()
-    board_for_insert.update({'created_at': datetime.utcnow(), 'user_id': user_id, 'users': {str(user_id): Roles.Admin}})
+    board_for_insert.update({'created_at': datetime.utcnow(), 'user_id': user_id, 'users': [{'id': str(user_id), 'role': Roles.Admin}]})
     new_board = await boards.insert_one(board_for_insert)
     return await find_board_by_id(new_board.inserted_id)
 
 
 async def delete_board_by_id(board_id, user_id):
     try:
-        task = await find_board_by_id(board_id)
+        board = await find_board_by_id(board_id)
         query = {'_id': ObjectId(board_id)}
-        if verify_user(task['user_id'], user_id):
+        if verify_user(board['user_id'], user_id):
             await boards.delete_one(query)
-            return {"message": f'Доска: {task["name"]} удалена'}
+            return {"message": f'Доска: {board["name"]} удалена'}
     except bson.errors.InvalidId:
-        raise exception
+        raise not_valid_id_exception
+
+
+async def add_user_to_board(board_id, data, user_id):
+    try:
+        board = await find_board_by_id(board_id)
+        query = {'_id': ObjectId(board_id)}
+        new_user = {"$push": {"users": {"id": data.id, "role": data.role}}}
+        if await get_admin_from_board(board, user_id):
+            if await find_user_by_id(data.id):
+                if not await get_user_from_board(board, data.id):
+                    await boards.update_one(query, new_user)
+                    return {"message": 'Пользователь успешно добавлен'}
+                raise has_user_exception
+    except bson.errors.InvalidId:
+        raise not_valid_id_exception
+
+
+async def update_board_user_role(board_id, data, user_id):
+    try:
+        board = await find_board_by_id(board_id)
+        update_user_role_query = {'_id': ObjectId(board_id), "users.id": data.id}
+        update_user_role = {"$set": {"users.$.role": data.role}}
+        if await get_admin_from_board(board, user_id):
+            if str(board["user_id"]) == str(data.id):
+                raise has_admin_exception
+            elif await get_user_from_board(board, data.id):
+                await boards.update_one(update_user_role_query, update_user_role)
+                return {"message": 'Роль обновлена'}
+            raise nof_found_user_exception
+    except bson.errors.InvalidId:
+        raise not_valid_id_exception
