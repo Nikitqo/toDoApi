@@ -69,13 +69,16 @@ async def find_user_by_email(email):
     return await users.find_one({"email": email})
 
 
+async def find_user_by_id(user_id):
+    if not await users.find_one({"_id": ObjectId(user_id)}):
+        raise user_exception
+    return True
+
+
 async def login_user_by_email(data):
     user = await find_user_by_email(data.username)
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail=[{"error": f'Пользователь с email: {data.username} не существует'}]
-        )
+        raise user_exception
     elif not verify_password(data.password, user["password_hash"]):
         raise HTTPException(
             status_code=403,

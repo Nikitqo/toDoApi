@@ -61,7 +61,7 @@ async def update_task_by_id(task_id, data, user_id):
     try:
         task = await find_task_by_id(task_id)
         query = {'_id': ObjectId(task_id)}
-        new_values = {"$set": dict(data)}
+        new_values = {"$set": data.model_dump(exclude_none=True)}
         if verify_user(task['user_id'], user_id):
             await tasks.update_one(query, new_values)
             return {"message": f'Задача: {task["name"]} обновлена'}

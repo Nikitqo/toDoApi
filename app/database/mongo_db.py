@@ -10,3 +10,4 @@ db = client['to_do_api']
 # Fetch our series collection
 users = db['users']
 tasks = db['tasks']
+boards = db['boards']
