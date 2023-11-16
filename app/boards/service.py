@@ -42,17 +42,16 @@ async def find_board_by_id(board_id):
     return board
 
 
-async def get_admin_from_board(board, user_id):
+def is_user_admin_in_board(board, user_id):
     for i in board["users"]:
-        if i["id"] == str(user_id):
-            if i["role"] != "Admin":
-                raise access_exception
-    return True
+        if i["id"] == str(user_id) and i["role"] == "Admin":
+            return True
+    raise access_exception
 
 
-async def get_user_from_board(board, user_id):
+def is_user_in_board(board, user_id):
     for i in board["users"]:
-        if i["id"] == str(user_id):
+        if str(i["id"]) == str(user_id):
             return True
     return False
 
@@ -82,12 +81,10 @@ async def add_user_to_board(board_id, data, user_id):
         board = await find_board_by_id(board_id)
         query = {'_id': ObjectId(board_id)}
         new_user = {"$push": {"users": {"id": data.id, "role": data.role}}}
-        if await get_admin_from_board(board, user_id):
-            if await find_user_by_id(data.id):
-                if not await get_user_from_board(board, data.id):
-                    await boards.update_one(query, new_user)
-                    return {"message": 'Пользователь успешно добавлен'}
-                raise has_user_exception
+        if is_user_admin_in_board(board, user_id) and await find_user_by_id(data.id) and not is_user_in_board(board, data.id):
+            await boards.update_one(query, new_user)
+            return {"message": 'Пользователь успешно добавлен'}
+        raise has_user_exception
     except bson.errors.InvalidId:
         raise not_valid_id_exception
 
@@ -97,10 +94,10 @@ async def update_board_user_role(board_id, data, user_id):
         board = await find_board_by_id(board_id)
         update_user_role_query = {'_id': ObjectId(board_id), "users.id": data.id}
         update_user_role = {"$set": {"users.$.role": data.role}}
-        if await get_admin_from_board(board, user_id):
+        if is_user_admin_in_board(board, user_id):
             if str(board["user_id"]) == str(data.id):
                 raise has_admin_exception
-            elif await get_user_from_board(board, data.id):
+            elif is_user_in_board(board, data.id):
                 await boards.update_one(update_user_role_query, update_user_role)
                 return {"message": 'Роль обновлена'}
             raise nof_found_user_exception
