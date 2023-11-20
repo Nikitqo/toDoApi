@@ -31,6 +31,11 @@ nof_found_user_exception = HTTPException(
             detail=[{"error": 'Пользователь не найден'}]
         )
 
+has_task_list_exception = HTTPException(
+                status_code=400,
+                detail=[{"message": 'Список задач с таким названием уже существует'}]
+            )
+
 
 async def find_board_by_id(board_id):
     board = await boards.find_one({"_id": ObjectId(board_id)})
@@ -56,11 +61,17 @@ def is_user_in_board(board, user_id):
     return False
 
 
+def is_task_list_in_board(board, name):
+    for i in board["task_list"]:
+        if str(i["name"]) == str(name):
+            raise has_task_list_exception
+
+
 # main logic
 
 async def create_board(board, user_id):
     board_for_insert = board.model_dump()
-    board_for_insert.update({'created_at': datetime.utcnow(), 'user_id': user_id, 'users': [{'id': str(user_id), 'role': Roles.Admin}]})
+    board_for_insert.update({'created_at': datetime.utcnow(), 'user_id': user_id, 'users': [{'id': str(user_id), 'role': Roles.Admin}], 'task_list': []})
     new_board = await boards.insert_one(board_for_insert)
     return await find_board_by_id(new_board.inserted_id)
 
@@ -103,3 +114,16 @@ async def update_board_user_role(board_id, data, user_id):
             raise nof_found_user_exception
     except bson.errors.InvalidId:
         raise not_valid_id_exception
+
+
+async def add_task_list_to_board(board_id, data, user_id):
+    try:
+        board = await find_board_by_id(board_id)
+        query = {'_id': ObjectId(board_id)}
+        new_task_list = {"$push": {"task_list": {"name": data.name, "tasks": []}}}
+        if is_user_admin_in_board(board, user_id) and await find_user_by_id(user_id) and not is_task_list_in_board(board, data.name):
+            await boards.update_one(query, new_task_list)
+            return {"message": f'Список задач {data.name} успешно добавлен'}
+    except bson.errors.InvalidId:
+        raise not_valid_id_exception
+

@@ -26,6 +26,11 @@ class BaseBoard(BaseModel):
 class Board(BaseBoard, ApiModel):
     created_at: datetime
     users: list
+    task_list: list
+
+
+class BoardTasks(BaseModel):
+    name: str
 
 
 class BoardUsers(ApiModel):
