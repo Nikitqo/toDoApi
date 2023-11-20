@@ -1,7 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from app.user import User, add_new_user, login_user_by_email, Token, get_current_user, delete_user_by_email, MessageResponse
+from app.user import UserPassword, add_new_user, login_user_by_email, Token, get_current_user, delete_user_by_email, MessageResponse
 
 router = APIRouter(
     prefix='/user',
@@ -12,7 +12,7 @@ Auth = Annotated[dict, Depends(get_current_user)]
 
 
 @router.post("/create", response_model=MessageResponse)
-async def registration_user(user: User):
+async def registration_user(user: UserPassword):
     return await add_new_user(user)
 
 

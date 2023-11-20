@@ -3,6 +3,7 @@ from pydantic import BaseModel, constr, Field
 from typing import Optional
 from enum import Enum
 from app.core import ApiModel
+from app.tasks import Task
 
 
 class Visible(str, Enum):
@@ -23,15 +24,15 @@ class BaseBoard(BaseModel):
     company: str
 
 
-class Board(BaseBoard, ApiModel):
-    created_at: datetime
-    users: list
-    task_list: list
-
-
 class BoardTasks(BaseModel):
     name: str
 
 
 class BoardUsers(ApiModel):
     role: Roles
+
+
+class Board(BaseBoard, ApiModel):
+    created_at: datetime
+    users: list[BoardUsers]
+    task_list: list[Task]
