@@ -4,6 +4,9 @@ from pydantic import BaseModel, EmailStr, SecretStr, field_validator
 class User(BaseModel):
     username: str
     email: EmailStr
+
+
+class UserPassword(User):
     password: SecretStr
 
     @field_validator('password')
